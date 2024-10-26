@@ -3,6 +3,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const authRoutes = require('./routes/auth');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -26,6 +28,16 @@ const upload = multer({ storage });
 
 // Rutas
 app.use('/api/auth/', authRoutes);
+
+// Endpoint para leer el archivo clients.json
+app.get('/api/clients', (req, res) => {
+    fs.readFile(path.join(__dirname, 'data', 'clients.json'), 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error al leer el archivo' });
+        }
+        res.json(JSON.parse(data));
+    });
+});
 
 // Iniciar el servidor
 app.listen(port, () => {

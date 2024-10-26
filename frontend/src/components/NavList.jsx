@@ -11,37 +11,35 @@ export function NavList() {
 
     return (
         <nav className='relative'>
-            {/* Icono del burger menu */}
+        {/* Icono del burger menu */}
             <button
                 onClick={toggleMenu}
-                className='text-white lg:hidden focus:outline-none'
+                className='text-black lg:hidden focus:outline-none'
             >
                 {isOpen ? <FaTimes size={24}/> : <FaBars size={24} />}
             </button>
-
-        <ul className="my-2 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
-            <a href="#" className="flex items-center hover:text-blue-500 transition-colors">
-            Home
-            </a>
-        
-        
-            <a href="#" className="flex items-center hover:text-blue-500 transition-colors">
-            Account
-            </a>
-
-        
-            <a href="#" className="flex items-center hover:text-blue-500 transition-colors">
-            Time
-            </a>
-
-        
-            <button 
-                onClick={handleLogout} 
-                className="flex items-center hover:text-blue-500 transition-colors"
+        {/* Menu items */}
+        <ul
+            className={`${ isOpen ? 'block rounded-md max-lg:border bg-white border-slate-100 max-lg:shadow-md' : 'hidden'}
+            absolute top-full right-0 lg:flex lg:static lg:w-auto lg:bg-transparent lg:flex-row lg:items-center lg:gap-6 lg:my-0 w-24`}
             >
-                Logout
-            </button>
-
+            <li className="flex items-center rounded-md hover:bg-slate-200 hover:text-blue-500 transition-colors w-full justify-end p-2">
+                <a href="#" className='text-right' onClick={toggleMenu}>Home</a>
+            </li>
+            <li className="flex items-center hover:text-blue-500 transition-colors w-full justify-end p-2">
+                <a href="#" onClick={toggleMenu}>Account</a>
+            </li>
+            <li className="flex items-center hover:text-blue-500 transition-colors w-full justify-end p-2">
+                <a href="/time" onClick={toggleMenu}>Time</a>
+            </li>
+            <li className="flex items-center hover:text-blue-500 transition-colors w-full justify-end p-2">
+                <button
+                    onClick={handleLogout}
+                    className="flex items-center hover:text-blue-500 transition-colors"
+                >
+                    Logout
+                </button>
+            </li>
         </ul>
         </nav>
     );
