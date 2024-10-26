@@ -21,7 +21,7 @@ export const SignIn = () => {
             localStorage.setItem('token', token);
 
             // Redirigir a otra página
-            navigate('/dashboard'); // Cambia esto a la ruta de tu dashboard
+            navigate('/dashboard');
         } catch (error) {
             if (error.response) {
                 console.log('Respuesta del servidor:', error.response.data);
@@ -35,17 +35,7 @@ export const SignIn = () => {
 
   return (
     <>
-        <div className="min-w-screen min-h-screen bg-gray-900 flex items-center justify-center px-5 py-5">
-            <div className="bg-gray-100 text-gray-500 rounded-3xl shadow-xl w-full overflow-hidden max-w-[1000px]">
-                <div className="md:flex w-full">
-                    <div className="hidden md:flex md:flex-wrap w-1/2 bg-indigo-500 py-10 px-10 justify-center content-center">
-                        <img src="/images/gsp.webp" alt="GSP Entretien" className='max-w-md h-min'/>
-                    </div>
-                    <div className="w-full md:w-1/2 py-10 px-5 md:px-10">
-                        <div className="text-center mb-10">
-                            <h1 className="font-bold text-3xl text-gray-900">Sign In</h1>
-                            <p>Enter your information to Sign In</p>
-                        </div>
+        
                         <form onSubmit={handleSubmit}>
                             <div>
                                 <div className="flex -mx-3">
@@ -85,10 +75,7 @@ export const SignIn = () => {
                                 </div>
                             </div>
                         </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    
     </>
   )
 }

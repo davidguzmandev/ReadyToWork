@@ -7,20 +7,6 @@ const path = require('path');
 const router = express.Router();
 const usersFilePath = path.join(__dirname, '../data/users.json');
 
-// Contraseña sin encriptar, Borrar cuando se implemente el registro
-const plainPassword = "123";
-
-// Encripta la contraseña
-bcrypt.hash(plainPassword, 10, (err, hash) => {
-    if (!err) {
-        console.log("Contraseña encriptada:", hash);
-        // Actualiza el archivo JSON con este hash como valor de "password"
-    } else {
-        console.error("Error encriptando la contraseña:", err);
-    }
-});
-
-
 // Leer usuarios desde el archivo JSON
 const getUsers = () => {
     try {
@@ -36,7 +22,7 @@ const saveUsers = (users) => {
     fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
 };
 
-// Registro de usuario
+// Registro de usuario NO ACTIVA POR AHORA
 router.post('/register', async (req, res) => {
     const { email, password } = req.body;
     try {
