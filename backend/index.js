@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Rutas
-app.use('/api/auth', authRoutes);
+app.use('/api/auth/', authRoutes);
 
 // Iniciar el servidor
 app.listen(port, () => {

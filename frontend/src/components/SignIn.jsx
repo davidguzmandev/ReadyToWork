@@ -13,8 +13,8 @@ export const SignIn = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/home', { email, password });
-            console.log('ingreso exitoso');
+            const response = await axios.post('http://localhost:5000/api/auth/', { email, password });
+            console.log('Ingreso exitoso');
             const { token } = response.data;
 
             // Almacenar el token en el almacenamiento local o en una cookie
@@ -23,7 +23,12 @@ export const SignIn = () => {
             // Redirigir a otra página
             navigate('/dashboard'); // Cambia esto a la ruta de tu dashboard
         } catch (error) {
-            console.log(error);
+            if (error.response) {
+                console.log('Respuesta del servidor:', error.response.data);
+                console.log('Estado de la respuesta:', error.response.status);
+            } else {
+                console.log('Error de red o configuración:', error.message);
+            }
             setErrorMessage('Error en la autenticación:' + error);
         }
     };

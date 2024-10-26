@@ -27,7 +27,6 @@ const getUsers = () => {
         const data = fs.readFileSync(usersFilePath, 'utf-8');
         return JSON.parse(data);
     } catch (error) {
-        console.error('Error al leer el archivo de usuarios:', error);
         return [];
     }
 };
@@ -58,23 +57,18 @@ router.post('/register', async (req, res) => {
 });
 
 // Iniciar sesión
-router.post('/home', async (req, res) => {
+router.post('/', async (req, res) => {
     const { email, password } = req.body;
     const users = getUsers();
     const user = users.find(user => user.email === email);
-    console.log('Contenido de req.body:', req.body);
-    console.log("Email recibido:", req.body.email);  // Para verificar el valor
-    console.log("Password recibido:", password);
 
     try {
         if (!user) {
-            console.log('no email' + user);
             return res.status(400).json({ error: 'Credenciales inválidas' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            console.log('no password');
             return res.status(400).json({ error: 'Credenciales inválidas' });
         }
 
