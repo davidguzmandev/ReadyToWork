@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../partials/Navbar'
 import ClockIn from '../components/ClockIn';
@@ -15,7 +15,8 @@ const Time = () => {
 
     return (
         <>
-          <ClockIn />
+            <Navbar />
+            <ClockIn />
         </>
     );
 };

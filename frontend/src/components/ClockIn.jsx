@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 
 const ClockIn = () => {
     const [clients, setClients] = useState([]); // Agregar los clientes
+    const [selectedClient, setSelectedClient] = useState(''); // Estado para el cliente seleccionado
+    const [work, setWork] = useState([]);
     const [km, setKm] = useState('');
     const [comments, setComments] = useState('');
-    const [work, setWork] = useState([]);
 
     const works = ['Commercial', 'Supervisor', 'Residential', 'Displacement KM']
 
@@ -33,94 +34,110 @@ const ClockIn = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        const formData = {
+            client: selectedClient,
+            work: work,
+            date: currentDate,
+            hour: currentTime,
+            km: km,
+            comments: comments
+        }//
         // Aquí puedes manejar el envío del formulario
-        console.log({ km, comments, work });
+        console.log({ selectedClient, km, comments, work, currentDate, currentTime });
     };
 
     return (
-        <form onSubmit={handleSubmit} className="p-4 bg-gray-100 rounded shadow-md">
-            <div className="mb-4">
-                <label htmlFor="client" className="block text-gray-700">Client:</label>
-                <select id="client" className="border rounded p-2 w-full" required>
-                    <option value=""></option>
-                    {clients.map((client) => (
-                        <option key={client.id} value={client.id}>{client.name}</option>
+        <div className="mx-auto max-w-screen-xl px-6 py-3">
+            <form onSubmit={handleSubmit} className="p-4 bg-gray-100 rounded shadow-md">
+                <div className="mb-4">
+                    <label htmlFor="client" className="block text-gray-700">Client:</label>
+                    <select 
+                        id="client"
+                        className="border rounded p-2 w-full"
+                        onChange={(e) => setSelectedClient(e.target.value)} // Cambiado a selectedClient
+                        required>
+                        <option value=""></option>
+                        {clients.map((client) => (
+                            <option key={client.id} value={client.name}>{client.name}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <fieldset className="mb-4">
+                    <legend>Type of Work:</legend>
+                    {works.map((option) => (
+                        <div key={option}>
+                            <label htmlFor="scales">
+                                <input 
+                                    type="checkbox"
+                                    id={`work-${option}`}
+                                    name="scales"
+                                    onChange={() => setWork(prevWork => ({
+                                        ...prevWork,
+                                        [option]: !prevWork[option] // Cambia solo el valor de la opción actual
+                                    }))}
+                                    className="mr-2"
+                                />
+                                {option} 
+                            </label>
+                        </div>
                     ))}
-                </select>
-            </div>
+                </fieldset>
 
-            <fieldset className="mb-4">
-                <legend>Type of Work:</legend>
-                {works.map((option) => (
-                    <div key={option}>
-                        <label htmlFor="scales">
-                            <input 
-                                type="checkbox" 
-                                id={`work-${option}`}
-                                name="scales" 
-                                onChange={() => setWork(prevWork => ({
-                                    ...prevWork,
-                                    [option]: !prevWork[option] // Cambia solo el valor de la opción actual
-                                }))}
-                                className="mr-2"
-                            />
-                            {option} 
-                        </label>
-                     </div>
-                ))}
-            </fieldset>
+                <div className="mb-4">
+                    <label htmlFor="date" className="block text-gray-700">Date:</label>
+                    <input
+                        type="date"
+                        id="date"
+                        value={currentDate}
+                        readOnly
+                        className="border rounded p-2 w-full bg-gray-200 cursor-not-allowed"
+                    />
+                </div>
 
-            <div className="mb-4">
-                <label htmlFor="date" className="block text-gray-700">Date:</label>
-                <input
-                    type="date"
-                    id="date"
-                    value={currentDate}
-                    readOnly
-                    className="border rounded p-2 w-full bg-gray-200 cursor-not-allowed"
-                />
-            </div>
+                <div className="mb-4">
+                    <label htmlFor="hour" className="block text-gray-700">Hour:</label>
+                    <input
+                        type="time"
+                        id="hour"
+                        value={currentTime}
+                        readOnly
+                        className="border rounded p-2 w-full bg-gray-200 cursor-not-allowed"
+                    />
+                </div>
 
-            <div className="mb-4">
-                <label htmlFor="hour" className="block text-gray-700">Hour:</label>
-                <input
-                    type="time"
-                    id="hour"
-                    value={currentTime}
-                    readOnly
-                    className="border rounded p-2 w-full bg-gray-200 cursor-not-allowed"
-                />
-            </div>
+                <div className="mb-4">
+                    <label htmlFor="km" className="block text-gray-700">Km:</label>
+                    <input
+                        type="number"
+                        id="km"
+                        value={km}
+                        onChange={(e) => setKm(e.target.value)}
+                        className="border rounded p-2 w-full"
+                    />
+                </div>
 
-            <div className="mb-4">
-                <label htmlFor="km" className="block text-gray-700">Km:</label>
-                <input
-                    type="number"
-                    id="km"
-                    value={km}
-                    onChange={(e) => setKm(e.target.value)}
-                    className="border rounded p-2 w-full"
-                />
-            </div>
-
-            <div className="mb-4">
-                <label htmlFor="comments" className="block text-gray-700">comments:</label>
-                <textarea
-                    id="comments"
-                    value={comments}
-                    onChange={(e) => setComments(e.target.value)}
-                    className="border rounded p-2 w-full"
-                    rows="4"
-                />
-            </div>
-
-            <button
-                type="submit"
-                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-            >
-                Send
-            </button>
-        </form>
+                <div className="mb-4">
+                    <label htmlFor="comments" className="block text-gray-700">comments:</label>
+                    <textarea
+                        id="comments"
+                        value={comments}
+                        onChange={(e) => setComments(e.target.value)}
+                        className="border rounded p-2 w-full"
+                        rows="4"
+                    />
+                </div>
+                <div className='text-right'>
+                    <button
+                        type="submit"
+                        className="bg-green-800 text-white p-2 rounded hover:bg-green-600"
+                    >
+                        Punch-in
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 };
 
