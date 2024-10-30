@@ -1,0 +1,16 @@
+[
+  {
+    "client": "Aluprotec",
+    "work": {
+      "Commercial": true
+    },
+    "date": "2024-10-30",
+    "hour": "21:02",
+    "km": "12",
+    "comments": "12",
+    "location": {
+      "latitude": 45.5278592,
+      "longitude": -73.515008
+    }
+  }
+]

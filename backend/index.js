@@ -39,6 +39,43 @@ app.get('/api/clients', (req, res) => {
     });
 });
 
+//Ruta para guardar los datos de horas en el JSON
+app.post('/api/saveData', (req, res) => {
+    
+    const data = req.body.data;
+    //Directorio donde se guardaran los datos
+    const filePath = path.join(__dirname, 'data', 'timeRecording.json');
+
+    //Leer los datos existentes
+    fs.readFile(filePath, 'utf8', (err, fileData) => {
+        
+        if (err) {
+            console.error('Error al leer el archivo:', err);
+            return res.status(500).json({ error: 'Error al leer el archivo' });
+        }
+
+        let jsonData = [];
+
+        // Verificar si hay datos existentes en el archivo
+        if (fileData) {
+            jsonData = JSON.parse(fileData);
+        }
+
+        // Agregar los nuevos datos
+        jsonData.push(data);
+
+        // Guardar los datos actualizados en el archivo
+        fs.writeFile(filePath, JSON.stringify(jsonData, null, 2), (err) => {
+            if (err) {
+                console.error('Error al escribir en el archivo:', err);
+                return res.status(500).json({ error: 'Error al guardar los datos' });
+            }
+
+            res.status(200).json({ message: 'Datos guardados exitosamente' });
+        });
+    });
+});
+
 // Iniciar el servidor
 app.listen(port, () => {
     console.log(`Servidor escuchando en http://localhost:${port}`);

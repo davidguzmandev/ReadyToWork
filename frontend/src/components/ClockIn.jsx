@@ -6,6 +6,7 @@ const ClockIn = () => {
     const [work, setWork] = useState([]);
     const [km, setKm] = useState('');
     const [comments, setComments] = useState('');
+    const [location, setLocation] = useState({latitude:null, longitude:null});
 
     const works = ['Commercial', 'Supervisor', 'Residential', 'Displacement KM']
 
@@ -15,6 +16,25 @@ const ClockIn = () => {
     // Fecha y hora actual
     const currentDate = new Date().toISOString().split('T')[0];
     const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    //Obtener la ubicacion
+    const fetchLocation = () => {
+        if(navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setLocation({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    console.error('Error al obtener la ubicación: ',error);
+                }
+            );
+        } else {
+            console.error('La geolocalización no es soportada en este navegador.')
+        }
+    };
 
     useEffect(() => {
         // Cargar clientes desde el archivo JSON
@@ -30,26 +50,50 @@ const ClockIn = () => {
         };
 
         fetchClientes();
+        fetchLocation();
     }, []); // El array vacío asegura que se ejecute solo una vez al montar el componente
 
-    const handleSubmit = (e) => {
+    const punchIn = async (e) => {
         e.preventDefault();
 
         const formData = {
-            client: selectedClient,
-            work: work,
-            date: currentDate,
-            hour: currentTime,
-            km: km,
-            comments: comments
-        }//
+            data: {
+                client: selectedClient,
+                work: work,
+                date: currentDate,
+                hour: currentTime,
+                km: km,
+                comments: comments,
+                location: location
+            }
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/saveData`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            // Verifica si la respuesta fue exitosa
+            if (!response.ok) {
+                throw new Error(`Error en la respuesta: ${response.statusText}`);
+            }
+
+            const data = await response.json(); // Espera el resultado de la conversión a JSON
+            console.log(data); // Muestra los datos recibidos del servidor
+
+        } catch (error) {
+            console.error('Error al enviar los datos: ', error);
+        }
         // Aquí puedes manejar el envío del formulario
-        console.log({ selectedClient, km, comments, work, currentDate, currentTime });
+        console.log({ formData});
     };
 
     return (
         <div className="mx-auto max-w-screen-xl px-6 py-3">
-            <form onSubmit={handleSubmit} className="p-4 bg-gray-100 rounded shadow-md">
+            <form onSubmit={punchIn} className="p-4 bg-gray-100 rounded shadow-md">
                 <div className="mb-4">
                     <label htmlFor="client" className="block text-gray-700">Client:</label>
                     <select 
