@@ -61,7 +61,10 @@ router.post('/', async (req, res) => {
         const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
             expiresIn: '1h',
         });
-        res.json({ token });
+
+        // Devuelve el token y el usuario (sin la contraseña)
+        const { password: _, ...userWithoutPassword } = user; // Desestructuración para eliminar la contraseña
+        res.json({ token, user: userWithoutPassword }); // Devuelve el token y el usuario
     } catch (error) {
         res.status(400).json({ error: 'Error al iniciar sesión' });
     }
