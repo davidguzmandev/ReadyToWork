@@ -44,22 +44,25 @@ const Dashboard = () => {
         <div className="mx-auto max-w-screen-xl px-6 py-3">
             {user ? (
                 <div>
-                    <h1>Welcome, {user.name}</h1>
+                    <h2 className='font-semibold text-xl'>Welcome, {user.name}</h2>
                     {matchingRecords.length > 0 ? (
                         <div>
-                            <p>Email: {user.email}</p>
-                            <p>ID: {user.id}</p>
-                            <h2>Usuarios con el mismo email:</h2>
-                            <ul>
+                            <p className='text-sm mb-4'>{user.email}</p>
+                            <ul className='flex'>
                                 {matchingRecords.map((record) => (
-                                    <li key={record.id}>
-                                        <p>Client: {record.client}</p>
-                                        <p>Work: {Object.keys(record.work).join(', ')}</p>
-                                        <p>KM: {record.km}</p>
-                                        <p>Comments: {record.comments}</p>
-                                        <p>Location: {record.location.latitude}, {record.location.longitude}</p>
-                                        <p>Date: {record.date}</p>
-                                        <p>Hour: {record.hour}</p>
+                                    <li 
+                                    key={record.id}
+                                    className='max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 m-2'
+                                    >
+                                        <div className="p-5">
+                                            <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{record.client}</h5>
+                                            <p className='font-normal text-gray-700 dark:text-gray-400'>Work: {Object.keys(record.work).join(', ')}</p>
+                                            <p className='font-normal text-gray-700 dark:text-gray-400'>KM: {record.km}</p>
+                                            <p className='font-normal text-gray-700 dark:text-gray-400'>Comments: {record.comments}</p>
+                                            <p className='font-normal text-gray-700 dark:text-gray-400'>Location: {record.location.latitude}, {record.location.longitude}</p>
+                                            <p className='font-normal text-gray-700 dark:text-gray-400'>Date: {record.date}</p>
+                                            <p className='font-normal text-gray-700 dark:text-gray-400'>Hour: {record.hour}</p>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
