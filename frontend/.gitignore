@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 
+.gitignore
+
 # Local environment variables
 .env
 
