@@ -1,14 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useContext, useState, useEffect } from 'react';
+import { UserContext } from '../utils/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 const ClockIn = () => {
+    const navigate = useNavigate();
     const [clients, setClients] = useState([]); // Agregar los clientes
     const [selectedClient, setSelectedClient] = useState(''); // Estado para el cliente seleccionado
     const [work, setWork] = useState([]);
     const [km, setKm] = useState('');
     const [comments, setComments] = useState('');
     const [location, setLocation] = useState({latitude:null, longitude:null});
+    const [nextId, setNextId] = useState(null); // Estado para el siguiente ID
+
 
     const works = ['Commercial', 'Supervisor', 'Residential', 'Displacement KM']
+    const { user } = useContext(UserContext);
 
     //URL de la API backend
     const API_URL = import.meta.env.VITE_BACK_API_URL;;
@@ -49,7 +55,19 @@ const ClockIn = () => {
             }
         };
 
+        const fetchRecords = async () => {
+            try {
+                const response = await fetch(`${API_URL}/time`);
+                const data = await response.json();
+                const maxId = data.reduce((max, record) => Math.max(max, record.id), 0); // Asigna el ID más alto
+                setNextId(maxId + 1); // Asigna el siguiente ID
+            } catch (error) {
+                console.error('Error al cargar los registros:', error);
+            }
+        };
+
         fetchClientes();
+        fetchRecords();
         fetchLocation();
     }, []); // El array vacío asegura que se ejecute solo una vez al montar el componente
 
@@ -58,10 +76,13 @@ const ClockIn = () => {
 
         const formData = {
             data: {
+                id: nextId,
+                name: user.name,
+                email: user.email,
                 client: selectedClient,
                 work: work,
                 date: currentDate,
-                hour: currentTime,
+                hourOpen: currentTime,
                 km: km,
                 comments: comments,
                 location: location
@@ -83,12 +104,11 @@ const ClockIn = () => {
 
             const data = await response.json(); // Espera el resultado de la conversión a JSON
             console.log(data); // Muestra los datos recibidos del servidor
-
+            navigate('/dashboard');// Despues de guardar los datos redirigimos al dashboard
         } catch (error) {
             console.error('Error al enviar los datos: ', error);
         }
         // Aquí puedes manejar el envío del formulario
-        console.log({ formData});
     };
 
     return (
@@ -112,11 +132,11 @@ const ClockIn = () => {
                     <legend>Type of Work:</legend>
                     {works.map((option) => (
                         <div key={option}>
-                            <label htmlFor="scales">
+                            <label htmlFor={`work-${option}`}>
                                 <input 
                                     type="checkbox"
                                     id={`work-${option}`}
-                                    name="scales"
+                                    name="work"
                                     onChange={() => setWork(prevWork => ({
                                         ...prevWork,
                                         [option]: !prevWork[option] // Cambia solo el valor de la opción actual

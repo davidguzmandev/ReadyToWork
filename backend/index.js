@@ -39,6 +39,16 @@ app.get('/api/clients', (req, res) => {
     });
 });
 
+// Endpoint para leer el archivo timeRecording.json
+app.get('/api/time', (req, res) => {
+    fs.readFile(path.join(__dirname, 'data', 'timeRecording.json'), 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error al leer el archivo' });
+        }
+        res.json(JSON.parse(data));
+    });
+});
+
 //Ruta para guardar los datos de horas en el JSON
 app.post('/api/saveData', (req, res) => {
     
