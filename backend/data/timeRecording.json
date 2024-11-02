@@ -12,6 +12,11 @@
     "location": {
       "latitude": 45.5278592,
       "longitude": -73.515008
+    },
+    "punchOutTime": "00:11",
+    "punchOutLocation": {
+      "latitude": 45.5278592,
+      "longitude": -73.515008
     }
   },
   {

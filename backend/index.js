@@ -49,16 +49,52 @@ app.get('/api/time', (req, res) => {
     });
 });
 
+app.patch('/api/timePunchOut', (req, res) => {
+    const { id, punchOutTime, punchOutLocation } = req.body;
+    const filePath = path.join(__dirname, 'data', 'timeRecording.json');
+  
+    fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+        console.error('Error al leer el archivo:', err);
+        return res.status(500).json({ error: 'Error al leer el archivo' });
+      }
+  
+      // Parsear y buscar el registro por ID
+      let records = JSON.parse(data);
+      const recordIndex = records.findIndex((record) => record.id === id);
+  
+      if (recordIndex === -1) {
+        return res.status(404).json({ error: 'Registro no encontrado' });
+      }
+  
+      // Actualizar la hora y ubicación de punch-out
+      records[recordIndex] = {
+        ...records[recordIndex],
+        punchOutTime,
+        punchOutLocation,
+      };
+  
+      // Guardar el archivo actualizado
+      fs.writeFile(filePath, JSON.stringify(records, null, 2), (writeErr) => {
+        if (writeErr) {
+          console.error('Error al escribir en el archivo:', writeErr);
+          return res.status(500).json({ error: 'Error al guardar los datos' });
+        }
+        res.status(200).json({ message: 'Punch-out registrado correctamente' });
+      });
+    });
+  });
+
 //Ruta para guardar los datos de horas en el JSON
 app.post('/api/saveData', (req, res) => {
-    
+
     const data = req.body.data;
     //Directorio donde se guardaran los datos
     const filePath = path.join(__dirname, 'data', 'timeRecording.json');
 
     //Leer los datos existentes
     fs.readFile(filePath, 'utf8', (err, fileData) => {
-        
+
         if (err) {
             console.error('Error al leer el archivo:', err);
             return res.status(500).json({ error: 'Error al leer el archivo' });
