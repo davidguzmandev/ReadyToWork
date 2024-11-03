@@ -16,7 +16,8 @@ const Dashboard = () => {
     const punchOutData = {
         id: recordId, // Incluye el ID del registro
         punchOutTime: time,
-        punchOutLocation: location
+        punchOutLocation: location,
+        open: false
     };
 
     try {
@@ -51,8 +52,8 @@ const Dashboard = () => {
     }
 };
 
-
   useEffect(() => {
+
     if(!user) return; // Espera a que user este definido
       const token = localStorage.getItem('token');
       if (!token) {
@@ -67,7 +68,7 @@ const Dashboard = () => {
           const data = await response.json();
 
           // Filtrar los registros que coinciden con el email del usuario logueado
-          const recordsWithSameEmail = data.filter((record) => record.email === user.email);
+          const recordsWithSameEmail = data.filter((record) => record.email === user.email && record.open == true);
           setMatchingRecords(recordsWithSameEmail);
         } catch (error) {
           console.error('Error al cargar los registros:', error);
@@ -85,9 +86,9 @@ const Dashboard = () => {
             {user ? (
                 <div>
                     <h2 className='font-semibold text-xl'>Welcome, {user.name}</h2>
+                    <p className='text-sm mb-4'>{user.email}</p>
                     {matchingRecords.length > 0 ? (
                         <div>
-                          <p className='text-sm mb-4'>{user.email}</p>
                           <ul className='flex-wrap flex'>
                               {matchingRecords.map((record) => (
                                   <li
@@ -101,7 +102,7 @@ const Dashboard = () => {
                                           <p className='font-normal text-gray-700 dark:text-gray-400'>Comments: {record.comments}</p>
                                           <p className='font-normal text-gray-700 dark:text-gray-400'>Location: {record.location.latitude}, {record.location.longitude}</p>
                                           <p className='font-normal text-gray-700 dark:text-gray-400'>Date: {record.date}</p>
-                                          <p className='font-normal text-gray-700 dark:text-gray-400'>Hour: {record.hour}</p>
+                                          <p className='font-normal text-gray-700 dark:text-gray-400'>Hour: {record.hourOpen}</p>
                                       </div>
                                       <div className="flex justify-end">
                                         <button
@@ -117,7 +118,7 @@ const Dashboard = () => {
                             </ul>
                         </div>
                     ) : (
-                        <p>No hay registros con el mismo email.</p>
+                        <p>No tienes ningún trabajo abierto.</p>
                     )}
                 </div>
             ) : (

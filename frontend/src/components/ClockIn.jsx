@@ -1,6 +1,7 @@
 import { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../utils/UserContext';
 import { useNavigate } from 'react-router-dom';
+import moment from 'moment'; // Time extension
 
 const ClockIn = () => {
     const navigate = useNavigate();
@@ -12,7 +13,6 @@ const ClockIn = () => {
     const [location, setLocation] = useState({latitude:null, longitude:null});
     const [nextId, setNextId] = useState(null); // Estado para el siguiente ID
 
-
     const works = ['Commercial', 'Supervisor', 'Residential', 'Displacement KM']
     const { user } = useContext(UserContext);
 
@@ -20,7 +20,7 @@ const ClockIn = () => {
     const API_URL = import.meta.env.VITE_BACK_API_URL;;
 
     // Fecha y hora actual
-    const currentDate = new Date().toISOString().split('T')[0];
+    const currentDate = moment().format('YYYY-MM-DD');
     const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     //Obtener la ubicacion
@@ -85,7 +85,8 @@ const ClockIn = () => {
                 hourOpen: currentTime,
                 km: km,
                 comments: comments,
-                location: location
+                location: location,
+                open: true
             }
         };
 
@@ -129,10 +130,10 @@ const ClockIn = () => {
                 </div>
 
                 <fieldset className="mb-4">
-                    <legend>Type of Work:</legend>
+                    <legend className='mb-4'>Type of Work:</legend>
                     {works.map((option) => (
-                        <div key={option}>
-                            <label htmlFor={`work-${option}`}>
+                        <div key={option} className="flex items-center space-x-2">
+                            <label htmlFor={`work-${option}`} className='font-medium'>
                                 <input 
                                     type="checkbox"
                                     id={`work-${option}`}
@@ -141,7 +142,7 @@ const ClockIn = () => {
                                         ...prevWork,
                                         [option]: !prevWork[option] // Cambia solo el valor de la opción actual
                                     }))}
-                                    className="mr-2"
+                                    className="w-5 h-4 text-gray-600 bg-gray-100 border-gray-300 focus:ring-gray-900 focus:ring-2 mr-2 mb-2"
                                 />
                                 {option} 
                             </label>
@@ -183,7 +184,7 @@ const ClockIn = () => {
                 </div>
 
                 <div className="mb-4">
-                    <label htmlFor="comments" className="block text-gray-700">comments:</label>
+                    <label htmlFor="comments" className="block text-gray-700">Comments:</label>
                     <textarea
                         id="comments"
                         value={comments}

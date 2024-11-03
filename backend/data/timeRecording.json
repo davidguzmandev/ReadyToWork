@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "name": "John Doe",
+    "name": "David Guzman",
     "email": "daguz.91@gmail.com",
     "client": "GSP Entrepot",
     "work": [],
@@ -13,10 +13,10 @@
       "latitude": 45.5278592,
       "longitude": -73.515008
     },
-    "punchOutTime": "00:11",
+    "punchOutTime": "16:11",
     "punchOutLocation": {
-      "latitude": 45.5278592,
-      "longitude": -73.515008
+      "latitude": 45.5237665,
+      "longitude": -73.5199113
     }
   },
   {
@@ -36,37 +36,51 @@
   },
   {
     "id": 3,
-    "name": "John Doe",
+    "name": "David Guzman",
     "email": "daguz.91@gmail.com",
-    "client": "GSP Entrepot",
+    "client": "Aluprotec",
     "work": {
       "Commercial": true
     },
-    "date": "2024-11-01",
-    "hour": "21:56",
-    "km": "12",
-    "comments": "Prueba",
+    "date": "2024-11-02",
+    "hourOpen": "17:09",
+    "km": "123",
+    "comments": "1231",
     "location": {
+      "latitude": 45.5237647,
+      "longitude": -73.5198863
+    },
+    "open": false,
+    "punchOutTime": "17:35",
+    "punchOutLocation": {
       "latitude": 45.5278592,
       "longitude": -73.515008
     },
-    "open": true
+    "duration": "0h 26m"
   },
   {
     "id": 4,
-    "name": "John Doe",
+    "name": "David Guzman",
     "email": "daguz.91@gmail.com",
-    "client": "GSP Entrepot",
+    "client": "Aluprotec",
     "work": {
-      "Supervisor": true
+      "Commercial": true,
+      "Displacement KM": true
     },
-    "date": "2024-11-01",
-    "hourOpen": "17:14",
-    "km": "1",
-    "comments": "12",
+    "date": "2024-11-02",
+    "hourOpen": "17:39",
+    "km": "5",
+    "comments": "Movilizacion hacia el cliente.",
     "location": {
       "latitude": 45.5278592,
       "longitude": -73.515008
-    }
+    },
+    "open": false,
+    "punchOutTime": "17:39",
+    "punchOutLocation": {
+      "latitude": 45.5278592,
+      "longitude": -73.515008
+    },
+    "duration": "0h 0m"
   }
 ]

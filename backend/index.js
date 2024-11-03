@@ -5,6 +5,7 @@ const multer = require('multer');
 const authRoutes = require('./routes/auth');
 const fs = require('fs');
 const path = require('path');
+const XLSX = require('xlsx');
 require('dotenv').config();
 
 const app = express();
@@ -50,7 +51,7 @@ app.get('/api/time', (req, res) => {
 });
 
 app.patch('/api/timePunchOut', (req, res) => {
-    const { id, punchOutTime, punchOutLocation } = req.body;
+    const { id, punchOutTime, punchOutLocation, open } = req.body;
     const filePath = path.join(__dirname, 'data', 'timeRecording.json');
   
     fs.readFile(filePath, 'utf8', (err, data) => {
@@ -67,11 +68,23 @@ app.patch('/api/timePunchOut', (req, res) => {
         return res.status(404).json({ error: 'Registro no encontrado' });
       }
   
-      // Actualizar la hora y ubicación de punch-out
+      // Obtener los valores de hourOpen y punchOutTime y calcular la duración
+      const hourOpen = new Date(`1970-01-01T${records[recordIndex].hourOpen}:00`);
+      const punchOut = new Date(`1970-01-01T${punchOutTime}:00`);
+      const timeDifference = punchOut - hourOpen;
+
+      // Convertir la diferencia a horas y minutos
+      const hours = Math.floor(timeDifference / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+      const duration = `${hours}h ${minutes}m`;
+
+      // Actualizar la hora y ubicación de punch-out ademas del campo open
       records[recordIndex] = {
         ...records[recordIndex],
         punchOutTime,
         punchOutLocation,
+        open,
+        duration
       };
   
       // Guardar el archivo actualizado
@@ -118,6 +131,62 @@ app.post('/api/saveData', (req, res) => {
             }
 
             res.status(200).json({ message: 'Datos guardados exitosamente' });
+        });
+    });
+});
+
+// Endpoint para exportar los datos a Excel
+app.get('/api/exportExcel', (req, res) => {
+    const filePath = path.join(__dirname, 'data', 'timeRecording.json');
+
+    // Leer los datos de timeRecording.json
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+          console.error('Error al leer el archivo:', err);
+          return res.status(500).json({ error: 'Error al leer el archivo' });
+        }
+        // Parsear el JSON y convertirlo a una hoja de Excel
+        const records = JSON.parse(data);
+        const workbook = XLSX.utils.book_new();
+        
+        const excelData = records.map(record => ({
+            'Email': record.email,
+            'Employee Name': record.name,
+            'Date': record.date,
+            'Type': record.work,
+            'Client': record.client,
+            'Start Time': record.hourOpen,
+            'End Time': record.punchOutTime,
+            'Working Hours': record.duration,
+            'Kilometers': record.km,
+            'Comments': record.comments,
+            'Start Location Latitude': record.location.latitude,
+            'Start Location Longitude': record.location.longitude,
+            'End Location Latitude': record.punchOutLocation?.latitude,
+            'End Location Longitude': record.punchOutLocation?.longitude,
+            'Is Open': record.open
+        }));
+        
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Time Records');
+
+        // Generar un archivo Excel temporal
+        const excelFilePath = path.join(__dirname, 'data', 'timeRecording.xlsx');
+        XLSX.writeFile(workbook, excelFilePath);
+
+        // Enviar el archivo Excel al cliente
+        res.download(excelFilePath, 'timeRecording.xlsx', (downloadErr) => {
+            if (downloadErr) {
+                console.error('Error al descargar el archivo:', downloadErr);
+                return res.status(500).json({ error: 'Error al descargar el archivo' });
+            }
+
+            // Eliminar el archivo temporal después de enviarlo
+            fs.unlink(excelFilePath, (unlinkErr) => {
+                if (unlinkErr) {
+                    console.error('Error al eliminar el archivo temporal:', unlinkErr);
+                }
+            });
         });
     });
 });
