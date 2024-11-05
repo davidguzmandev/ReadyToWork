@@ -15,8 +15,14 @@ export const SignIn = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const userData = {
+            email,
+            password
+        };
+        
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/', { email, password });
+            const response = await axios.post('http://localhost:5000/api/auth/', userData);
 
             const { token, user } = response.data;
 
@@ -36,55 +42,55 @@ export const SignIn = () => {
   return (
     <>
         <form onSubmit={handleSubmit}>
-                {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-                <div>
-                    <div className="flex -mx-3">
-                        <div className="w-full px-3 mb-5">
-                            <label htmlFor="email" className="text-xs font-semibold px-1">Email</label>
-                            <div className="flex">
-                                <div className="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center">
-                                    <IconMail stroke={1} />
-                                </div>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500"
-                                    placeholder="johnsmith@example.com"
-                                    required
-                                />
+            {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+            <div>
+                <div className="flex -mx-3">
+                    <div className="w-full px-3 mb-5">
+                        <label htmlFor="email" className="text-xs font-semibold px-1">Email</label>
+                        <div className="flex">
+                            <div className="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center">
+                                <IconMail stroke={1} />
                             </div>
-                        </div>
-                    </div>
-                    <div className="flex -mx-3">
-                        <div className="w-full px-3 mb-12">
-                            <label htmlFor="password" className="text-xs font-semibold px-1">Password</label>
-                            <div className="flex">
-                                <div className="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center">
-                                    <IconKey stroke={1} />
-                                </div>
-                                <input
-                                    type="password"
-                                    id="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500"
-                                    placeholder="************"
-                                    required
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex -mx-3">
-                        <div className="w-full px-3 mb-5">
-                            <button className="block w-full max-w-xs mx-auto bg-indigo-500 hover:bg-indigo-700 focus:bg-indigo-700 text-white rounded-lg px-3 py-3 font-semibold">
-                                Log In
-                            </button>
+                            <input
+                                type="email"
+                                id="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500"
+                                placeholder="johnsmith@example.com"
+                                required
+                            />
                         </div>
                     </div>
                 </div>
-            </form>
+                <div className="flex -mx-3">
+                    <div className="w-full px-3 mb-12">
+                        <label htmlFor="password" className="text-xs font-semibold px-1">Password</label>
+                        <div className="flex">
+                            <div className="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center">
+                                <IconKey stroke={1} />
+                            </div>
+                            <input
+                                type="password"
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500"
+                                placeholder="************"
+                                required
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div className="flex -mx-3">
+                    <div className="w-full px-3 mb-5">
+                        <button className="block w-full max-w-xs mx-auto bg-indigo-500 hover:bg-indigo-700 focus:bg-indigo-700 text-white rounded-lg px-3 py-3 font-semibold">
+                            Log In
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
     </>
   )
 }

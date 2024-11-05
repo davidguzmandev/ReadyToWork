@@ -6,7 +6,11 @@ const authRoutes = require('./routes/auth');
 const fs = require('fs');
 const path = require('path');
 const XLSX = require('xlsx');
+const connectDB = require('./routes/db');
 require('dotenv').config();
+connectDB(); // Conectar a MongoDB
+
+const Client = require('./models/Client'); // Importar el modelo Client
 
 const app = express();
 const port = process.env.PORT || 5000; // Puerto para el servidor
@@ -14,6 +18,7 @@ const port = process.env.PORT || 5000; // Puerto para el servidor
 //Middleware
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Configuración de multer para la carga de archivos
 const storage = multer.diskStorage({
@@ -30,14 +35,15 @@ const upload = multer({ storage });
 // Rutas
 app.use('/api/auth/', authRoutes);
 
-// Endpoint para leer el archivo clients.json
-app.get('/api/clients', (req, res) => {
-    fs.readFile(path.join(__dirname, 'data', 'clients.json'), 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ error: 'Error al leer el archivo' });
-        }
-        res.json(JSON.parse(data));
-    });
+// Endpoint para obtener los clientes desde MongoDB
+app.get('/api/clients', async (req, res) => {
+    try {
+        const clients = await Client.find(); // Obtener todos los clientes de MongoDB
+        res.json(clients); // Enviar los clientes como respuesta
+    } catch (err) {
+        console.error('Error al obtener los clientes:', err);
+        return res.status(500).json({ error: 'Error al obtener los clientes' });
+    }
 });
 
 // Endpoint para leer el archivo timeRecording.json

@@ -9,7 +9,7 @@ const Dashboard = () => {
   const [location, setLocation] = useState({latitude:null, longitude:null});
 
   const { user } = useContext(UserContext);
-  const API_URL = import.meta.env.VITE_BACK_API_URL;;
+  const API_URL = import.meta.env.VITE_BACK_API_URL;
 
   const handlePunchOut = async (recordId) => {
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

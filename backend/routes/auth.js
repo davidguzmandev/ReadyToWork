@@ -1,13 +1,14 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
-
+const User = require('../models/User'); // Importar el modelo de usuario
+/* const path = require('path'); // Asegúrate de que esta línea esté presente
+const fs = require('fs'); // Asegúrate de que esta línea esté presente */
 const router = express.Router();
-const usersFilePath = path.join(__dirname, '../data/users.json');
 
-// Leer usuarios desde el archivo JSON
+/* const usersFilePath = path.join(__dirname, '../data/users.json'); */
+
+/* // Leer usuarios desde el archivo JSON
 const getUsers = () => {
     try {
         const data = fs.readFileSync(usersFilePath, 'utf-8');
@@ -20,35 +21,39 @@ const getUsers = () => {
 // Escribir usuarios al archivo JSON
 const saveUsers = (users) => {
     fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
-};
+}; */
 
-// Registro de usuario NO ACTIVA POR AHORA
+// Registro de usuario
 router.post('/register', async (req, res) => {
     const { email, password } = req.body;
     try {
-        const users = getUsers();
-        const existingUser = users.find(user => user.email === email);
+        // Verificar si el usuario ya existe
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ error: 'Usuario ya existe' });
         }
 
+        // Hashear la contraseña y guardar el nuevo usuario
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = { email, password: hashedPassword };
-        users.push(newUser);
-        saveUsers(users);
+        const newUser = new User({ email, password: hashedPassword });
+        await newUser.save();
+
         res.status(201).json({ message: 'Usuario creado con éxito' });
     } catch (error) {
-        res.status(400).json({ error: 'Error al registrar el usuario' });
+        res.status(500).json({ error: 'Error al registrar el usuario' });
     }
 });
 
 // Iniciar sesión
 router.post('/', async (req, res) => {
     const { email, password } = req.body;
-    const users = getUsers();
-    const user = users.find(user => user.email === email);
+/*     const users = getUsers();
+    const user = users.find(user => user.email === email); */
+    const user = await User.findOne({ email });
 
     try {
+        console.log('Sesion iniciada');
+        // Buscar el usuario en la base de datos
         if (!user) {
             return res.status(400).json({ error: 'Credenciales inválidas' });
         }
@@ -63,10 +68,11 @@ router.post('/', async (req, res) => {
         });
 
         // Devuelve el token y el usuario (sin la contraseña)
-        const { password: _, ...userWithoutPassword } = user; // Desestructuración para eliminar la contraseña
+        const { password: _, ...userWithoutPassword } = user.toObject(); // Desestructuración para eliminar la contraseña
         res.json({ token, user: userWithoutPassword }); // Devuelve el token y el usuario
     } catch (error) {
-        res.status(400).json({ error: 'Error al iniciar sesión' });
+        console.error('Error al iniciar sesión:', error);
+        res.status(500).json({ error: 'Error al iniciar sesión' });
     }
 });
 

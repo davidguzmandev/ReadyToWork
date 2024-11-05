@@ -1,0 +1,16 @@
+[
+    {
+    "id": 1,
+    "name": "David Guzman",
+    "email": "daguz.91@gmail.coms",
+    "password": "$2a$10$J4JHeJ4ZsNvZvmRs.p2jmO/np7zY.ydLo50ky7xYoe6BAqR0anlOy",
+    "photo": "ruta/foto.jpg",
+    "location": { "latitude": 40.7128, "longitude": -74.0060 },
+    "entries": [
+        {
+        "entryTime": "2024-10-25T08:00:00Z",
+        "exitTime": "2024-10-25T17:00:00Z"
+        }
+    ]
+    }
+]
