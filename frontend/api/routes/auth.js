@@ -56,7 +56,7 @@ router.get('/', async (req, res) => {
 });
 
 // Iniciar sesión
-router.post('/', async (req, res) => {
+router.post('/api', async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
