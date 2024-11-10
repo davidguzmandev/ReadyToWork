@@ -2,26 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User'); // Importar el modelo de usuario
-/* const path = require('path'); // Asegúrate de que esta línea esté presente
-const fs = require('fs'); // Asegúrate de que esta línea esté presente */
 const router = express.Router();
-
-/* const usersFilePath = path.join(__dirname, '../data/users.json'); */
-
-/* // Leer usuarios desde el archivo JSON
-const getUsers = () => {
-    try {
-        const data = fs.readFileSync(usersFilePath, 'utf-8');
-        return JSON.parse(data);
-    } catch (error) {
-        return [];
-    }
-};
-
-// Escribir usuarios al archivo JSON
-const saveUsers = (users) => {
-    fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
-}; */
 
 // Registro de usuario
 router.post('/register', async (req, res) => {
@@ -44,11 +25,39 @@ router.post('/register', async (req, res) => {
     }
 });
 
+//Recibe la solicitud get del frontend y la convierte a post, esto por el problema CORS
+router.get('/', async (req, res) => {
+    console.log('Entro al get de login');
+    const { email, password } = req.query; // Se usa query en lugar de body
+    
+    // Llamar directamente a la lógica de autenticación, como si fuera un POST
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(400).json({ error: 'Credenciales inválidas' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ error: 'Credenciales inválidas' });
+        }
+
+        const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
+            expiresIn: '1h',
+        });
+
+        const { password: _, ...userWithoutPassword } = user.toObject();
+        res.json({ token, user: userWithoutPassword });
+    } catch (error) {
+        console.error('Error al iniciar sesión:', error);
+        res.status(500).json({ error: 'Error al iniciar sesión' });
+    }
+});
+
 // Iniciar sesión
 router.post('/', async (req, res) => {
     const { email, password } = req.body;
-/*     const users = getUsers();
-    const user = users.find(user => user.email === email); */
     const user = await User.findOne({ email });
 
     try {

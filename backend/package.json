@@ -20,7 +20,8 @@
     "mongodb": "^6.10.0",
     "mongoose": "^8.8.0",
     "multer": "^1.4.5-lts.1",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "vercel": "32.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"

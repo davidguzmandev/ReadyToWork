@@ -11,12 +11,24 @@ require('dotenv').config();
 connectDB(); // Conectar a MongoDB
 
 const Client = require('./models/Client'); // Importar el modelo Client
-
 const app = express();
-const port = process.env.PORT || 5000; // Puerto para el servidor
+
+const FRONTEND_URL = process.env.FRONTEND_URL
+
+// Configuración de CORS
+const corsOptions = {
+    origin: '*', // Permite solicitudes de tu frontend
+    methods: ['GET', 'POST'], // Métodos permitidos
+    allowedHeaders: ['Content-Type', 'Authorization'] // Encabezados permitidos
+  };
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+const port = process.env.PORT || 3001; // Puerto para el servidor
 
 //Middleware
-app.use(cors());
+
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -198,6 +210,6 @@ app.get('/api/exportExcel', (req, res) => {
 });
 
 // Iniciar el servidor
-app.listen(port, () => {
-    console.log(`Servidor escuchando en http://localhost:${port}`);
+app.listen(port,'0.0.0.0', () => {
+    console.log(`Servidor escuchando en http://0.0.0.0:${port}`);
 });
