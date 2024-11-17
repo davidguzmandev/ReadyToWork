@@ -2,21 +2,20 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User'); // Importar el modelo de usuario
+const {authenticateToken, authorizeRoles}  = require('../middleware/auth');  // Importa los middleware de autenticación
 const router = express.Router();
 
 // Registro de usuario
 router.post('/register', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
     try {
-        // Verificar si el usuario ya existe
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ error: 'Usuario ya existe' });
         }
 
-        // Hashear la contraseña y guardar el nuevo usuario
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ email, password: hashedPassword });
+        const newUser = new User({ email, password: hashedPassword, role: role || 'guest' });
         await newUser.save();
 
         res.status(201).json({ message: 'Usuario creado con éxito' });
@@ -26,32 +25,17 @@ router.post('/register', async (req, res) => {
 });
 
 //Recibe la solicitud get del frontend y la convierte a post, esto por el problema CORS
-router.get('/', async (req, res) => {
-    console.log('Entro al get de login');
-    const { email, password } = req.query; // Se usa query en lugar de body
-    
-    // Llamar directamente a la lógica de autenticación, como si fuera un POST
+router.get('/user', authenticateToken, authorizeRoles('admin'), async (req, res) => {
     try {
-        const user = await User.findOne({ email });
-
+        // Aquí usamos `req.user` para acceder a la información del usuario decodificada desde el token
+        const user = await User.findById(req.user.id);  // Suponiendo que el token contiene el id del usuario
         if (!user) {
-            return res.status(400).json({ error: 'Credenciales inválidas' });
+            return res.status(404).json({ message: 'Usuario no encontrado' });
         }
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ error: 'Credenciales inválidas' });
-        }
-
-        const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
-            expiresIn: '1h',
-        });
-
-        const { password: _, ...userWithoutPassword } = user.toObject();
-        res.json({ token, user: userWithoutPassword });
+        res.json(user);  // Devuelve los datos del usuario
     } catch (error) {
-        console.error('Error al iniciar sesión:', error);
-        res.status(500).json({ error: 'Error al iniciar sesión' });
+        console.error(error);
+        res.status(500).json({ message: 'Error en el servidor' });
     }
 });
 
@@ -61,26 +45,28 @@ router.post('/', async (req, res) => {
     const user = await User.findOne({ email });
 
     try {
-        console.log('Sesion iniciada');
         // Buscar el usuario en la base de datos
-        if (!user) {
-            return res.status(400).json({ error: 'Credenciales inválidas' });
-        }
+        if (!user) return res.status(400).json({ error: 'Credenciales inválidas' });
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ error: 'Credenciales inválidas' });
-        }
+        if (!isMatch) return res.status(400).json({ error: 'Credenciales inválidas' });
 
-        const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
-            expiresIn: '1h',
+        const token = jwt.sign(
+            { email: user.email, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+         // Configurar la cookie de sesión (sin maxAge)
+         res.cookie('authToken', token, {
+            httpOnly: true,       // Solo accesible desde el servidor
+            sameSite: 'strict',   // Protección contra CSRF
         });
 
         // Devuelve el token y el usuario (sin la contraseña)
         const { password: _, ...userWithoutPassword } = user.toObject(); // Desestructuración para eliminar la contraseña
         res.json({ token, user: userWithoutPassword }); // Devuelve el token y el usuario
     } catch (error) {
-        console.error('Error al iniciar sesión:', error);
         res.status(500).json({ error: 'Error al iniciar sesión' });
     }
 });

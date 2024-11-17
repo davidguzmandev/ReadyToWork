@@ -7,13 +7,14 @@ const ClockIn = () => {
     const navigate = useNavigate();
     const [clients, setClients] = useState([]); // Agregar los clientes
     const [selectedClient, setSelectedClient] = useState(''); // Estado para el cliente seleccionado
-    const [work, setWork] = useState([]);
+    const [work, setWork] = useState({});
     const [km, setKm] = useState('');
     const [comments, setComments] = useState('');
     const [location, setLocation] = useState({latitude:null, longitude:null});
     const [nextId, setNextId] = useState(null); // Estado para el siguiente ID
+    const [error, setError] = useState(''); // Estado para gestionar el error
 
-    const works = ['Commercial', 'Supervisor', 'Residential', 'Displacement KM']
+    const works = ['Commercial', 'Supervisor', 'Residential', 'Displacement']
     const { user } = useContext(UserContext);
 
     //URL de la API backend
@@ -21,7 +22,7 @@ const ClockIn = () => {
 
     // Fecha y hora actual
     const currentDate = moment().format('YYYY-MM-DD');
-    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const currentTime = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
     //Obtener la ubicacion
     const fetchLocation = () => {
@@ -74,6 +75,14 @@ const ClockIn = () => {
     const punchIn = async (e) => {
         e.preventDefault();
 
+         // Verifica si al menos uno de los checkboxes está seleccionado
+        const isAnySelected = Object.values(work).includes(true);
+
+        if (!isAnySelected) {
+            setError('Select at least one type of work'); // Si no hay ninguno seleccionado, muestra el error
+        return;
+        }
+
         const formData = {
             data: {
                 id: nextId,
@@ -103,8 +112,6 @@ const ClockIn = () => {
                 throw new Error(`Error en la respuesta: ${response.statusText}`);
             }
 
-            const data = await response.json(); // Espera el resultado de la conversión a JSON
-            console.log(data); // Muestra los datos recibidos del servidor
             navigate('/dashboard');// Despues de guardar los datos redirigimos al dashboard
         } catch (error) {
             console.error('Error al enviar los datos: ', error);
@@ -113,13 +120,13 @@ const ClockIn = () => {
     };
 
     return (
-        <div className="mx-auto max-w-screen-xl px-6 py-3">
-            <form onSubmit={punchIn} className="p-4 bg-gray-100 rounded shadow-md">
+        <div className="mx-auto max-w-screen-xl px-6 py-3 bg-white">
+            <form onSubmit={punchIn} className="p-4 bg-gray-100 rounded-lg">
                 <div className="mb-4">
                     <label htmlFor="client" className="block text-gray-700">Client:</label>
                     <select 
                         id="client"
-                        className="border rounded p-2 w-full"
+                        className="border rounded-full p-2 w-full"
                         onChange={(e) => setSelectedClient(e.target.value)} // Cambiado a selectedClient
                         required>
                         <option value=""></option>
@@ -128,7 +135,7 @@ const ClockIn = () => {
                         ))}
                     </select>
                 </div>
-
+                <p className='text-red-500'>{error}</p>
                 <fieldset className="mb-4">
                     <legend className='mb-4'>Type of Work:</legend>
                     {works.map((option) => (
@@ -137,7 +144,8 @@ const ClockIn = () => {
                                 <input 
                                     type="checkbox"
                                     id={`work-${option}`}
-                                    name="work"
+                                    name={`work-${option}`}
+                                    checked={work[option] || false} // Controla el estado del checkbox con `checked`
                                     onChange={() => setWork(prevWork => ({
                                         ...prevWork,
                                         [option]: !prevWork[option] // Cambia solo el valor de la opción actual
@@ -157,7 +165,7 @@ const ClockIn = () => {
                         id="date"
                         value={currentDate}
                         readOnly
-                        className="border rounded p-2 w-full bg-gray-200 cursor-not-allowed"
+                        className="border rounded-full p-2 w-full bg-gray-200 cursor-not-allowed"
                     />
                 </div>
 
@@ -168,7 +176,7 @@ const ClockIn = () => {
                         id="hour"
                         value={currentTime}
                         readOnly
-                        className="border rounded p-2 w-full bg-gray-200 cursor-not-allowed"
+                        className="border rounded-full p-2 w-full bg-gray-200 cursor-not-allowed"
                     />
                 </div>
 
@@ -179,7 +187,7 @@ const ClockIn = () => {
                         id="km"
                         value={km}
                         onChange={(e) => setKm(e.target.value)}
-                        className="border rounded p-2 w-full"
+                        className="border rounded-full p-2 w-full"
                     />
                 </div>
 
@@ -189,14 +197,14 @@ const ClockIn = () => {
                         id="comments"
                         value={comments}
                         onChange={(e) => setComments(e.target.value)}
-                        className="border rounded p-2 w-full"
+                        className="border rounded-xl p-2 w-full"
                         rows="4"
                     />
                 </div>
                 <div className='text-right'>
                     <button
                         type="submit"
-                        className="bg-green-800 text-white p-2 rounded hover:bg-green-600"
+                        className="bg-indigo-700 text-white p-2 rounded-full hover:bg-indigo-600"
                     >
                         Punch-in
                     </button>
