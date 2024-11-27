@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { SignIn } from '../components/SignIn';
+import { SignIn } from '../partials/SignIn';
 import Footer from '../partials/Footer';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,7 +27,8 @@ const Home = () => {
                         <div className="w-full md:w-1/2 py-10 px-5 md:px-10">
                             <div className="text-center mb-10">
                                 <h1 className="font-bold text-3xl text-gray-900">Sign In</h1>
-                                <p>Enter your information to Sign In</p><br />
+                                <p>Enter your information to Sign In</p>
+                                <br />
                                 <p>-- Dear guest, login with: --</p>
                                 <p><strong>Email:</strong> admin@gmail.com</p>
                                 <p><strong>Password:</strong> 123</p>

@@ -14,7 +14,8 @@ const timeRecordingSchema = new mongoose.Schema({
   date: { type: String, required: true }, // Fecha del registro
   hourOpen: { type: String, required: true }, // Hora de entrada
   km: { type: String, required: false }, // Kilómetros
-  comments: { type: String, required: false }, // Comentarios
+  comment1: { type: String, required: false }, // Comentarios
+  comment2: { type: String, required: false }, // Comentarios
   location: {
     latitude: { type: Number, required: true }, // Latitud
     longitude: { type: Number, required: true } // Longitud

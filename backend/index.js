@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const authRoutes = require('./routes/auth');
+const recordRoutes = require('./routes/record');
 const fs = require('fs');
 const XLSX = require('xlsx');
 const connectDB = require('./routes/db');
@@ -45,6 +46,7 @@ const upload = multer({ storage });
 // Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/user', authRoutes);
+app.use('/api/record/', recordRoutes);
 
 // Endpoint para obtener los clientes desde MongoDB
 app.get('/api/clients', async (req, res) => {
@@ -69,8 +71,8 @@ app.get('/api/time', async (req, res) => {
 });
 
 app.patch('/api/timePunchOut', async (req, res) => {
-    const { id, punchOutTime, punchOutLocation, punchOutDate, open } = req.body;
-  
+    const { id, punchOutTime, punchOutLocation, punchOutDate, open, comment2 } = req.body;
+
     try {
         // Buscar el registro en MongoDB por el ID
         const record = await TimeRecording.findOne({ id });
@@ -82,8 +84,6 @@ app.patch('/api/timePunchOut', async (req, res) => {
         // Obtener los valores de hourOpen y punchOutTime y calcular la duración
         const hourOpen = new Date(`${record.date}T${record.hourOpen}:00`);
         const punchOut = new Date(`${punchOutDate}T${punchOutTime}:00`);
-        console.log(record.date);
-        console.log(punchOutDate);
 
         // Verificar si las fechas coinciden
         if (record.date !== punchOutDate) {
@@ -91,7 +91,8 @@ app.patch('/api/timePunchOut', async (req, res) => {
             record.punchOutTime = punchOutTime;
             record.punchOutLocation = punchOutLocation;
             record.open = open;
-            record.duration = 'Ha pasado la media noche';
+            record.duration = "It's been more than 12 hours";
+            record.comment2 = comment2;
 
             // Guardar el registro actualizado y terminar la respuesta
             await record.save();
@@ -110,6 +111,7 @@ app.patch('/api/timePunchOut', async (req, res) => {
         record.punchOutLocation = punchOutLocation;
         record.open = open;
         record.duration = duration;
+        record.comment2 = comment2;
   
       // Guardar el registro actualizado en MongoDB
       await record.save();
@@ -156,7 +158,8 @@ app.get('/api/exportExcel', async (req, res) => {
             'End Time': record.punchOutTime,
             'Working Hours': record.duration,
             'Kilometers': record.km,
-            'Comments': record.comments,
+            'Open Comment': record.comment1,
+            'Close Comment': record.comment2,
             'Start Location Latitude': record.location.latitude,
             'Start Location Longitude': record.location.longitude,
             'End Location Latitude': record.punchOutLocation?.latitude,
