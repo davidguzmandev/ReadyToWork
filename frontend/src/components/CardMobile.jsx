@@ -5,77 +5,50 @@ import { Link } from "react-router-dom";
 import { fetchLocation } from "../utils/fetchLocation";
 import { calculateElapsedTime } from "../utils/elapsedTime";
 import { handlePunchOut } from "../utils/handlePunchOut";
+import { IconBoltFilled} from "@tabler/icons-react";
+import PopupModal from "../utils/EndShift";
 
 export const CardMobile = () => {
   const navigate = useNavigate();
   const [matchingRecords, setMatchingRecords] = useState([]); // Registros con email coincidente
-  const [location, setLocation] = useState({ latitude: null, longitude: null });
-  const [elapsedTime, setElapsedTime] = useState({}); // Almacena los tiempos transcurridos para cada record
+  const [location, setLocation] = useState({
+    latitude: -34.397,
+    longitude: 150.644,
+  });
+  const [elapsedTime, setElapsedTime] = useState(""); // Almacena los tiempos transcurridos para cada record
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { user } = useContext(UserContext);
   const API_URL = import.meta.env.VITE_BACK_API_URL;
 
-  /* const handlePunchOut = async (recordId) => {
-    const time = new Date().toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    // Fecha actual en la zona horaria local
-    const currentDateLocal = moment()
-      .tz("America/New_York")
-      .format("YYYY-MM-DD");
-    const punchOutData = {
-      id: recordId, // Incluye el ID del registro
-      punchOutTime: time,
-      punchOutLocation: location,
-      punchOutDate: currentDateLocal,
-      open: false,
-    };
+  const handleEndShiftClick = () => {
+    setIsModalOpen(true);
+    console.log(elapsedTime);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const onPunchOut = async (recordId, comment2) => {
+    setIsModalOpen(false);
 
     try {
-      await fetch(`${API_URL}/timePunchOut`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(punchOutData),
-      });
-
-      // Actualizar el estado del componente para eliminar el registro del DOM
-      setMatchingRecords(
-        matchingRecords.filter((record) => record.id !== recordId)
+      await handlePunchOut(
+        recordId,
+        location,
+        API_URL,
+        setMatchingRecords,
+        matchingRecords,
+        comment2,
+        elapsedTime
       );
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Error al registrar el punch-out:", error);
-    }
-  }; */
-
-  const onPunchOut = async (recordId) => {
-    const confirmed = window.confirm("Are you sure you want to Punch-out?");
-    if (!confirmed) return;
-
-    try {
-      await handlePunchOut(recordId, location, API_URL, setMatchingRecords, matchingRecords);
-    } catch (error) {
+      alert("Failed to punch out. Please try again.");
       console.error("Error during punch-out:", error);
     }
   };
-
-/*   const fetchLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("Error al obtener la ubicación: ", error);
-        }
-      );
-    } else {
-      console.error("La geolocalización no es soportada en este navegador.");
-    }
-  }; */
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -85,8 +58,8 @@ export const CardMobile = () => {
     }
 
     fetchLocation()
-    .then((locationData) => setLocation(locationData))
-    .catch((err) => console.log(err));
+      .then((locationData) => setLocation(locationData))
+      .catch((err) => console.log(err));
 
     // Cargar registros desde el archivo JSON y encontrar coincidencias de email
     const fetchTimeRecording = async () => {
@@ -102,7 +75,10 @@ export const CardMobile = () => {
         // Calcular tiempos transcurridos iniciales
         const initialElapsedTimes = {};
         recordsWithSameEmail.forEach((record) => {
-          initialElapsedTimes[record.id] = calculateElapsedTime(record.hourOpen);
+          initialElapsedTimes[record.id] = calculateElapsedTime(
+            record.hourOpen,
+            record.date
+          );
         });
         setElapsedTime(initialElapsedTimes);
       } catch (error) {
@@ -119,7 +95,10 @@ export const CardMobile = () => {
       setElapsedTime((prevTimes) => {
         const updatedTimes = { ...prevTimes };
         matchingRecords.forEach((record) => {
-          updatedTimes[record.id] = calculateElapsedTime(record.hourOpen);
+          updatedTimes[record.id] = calculateElapsedTime(
+            record.hourOpen,
+            record.date
+          );
         });
         return updatedTimes;
       });
@@ -132,11 +111,11 @@ export const CardMobile = () => {
     <>
       {matchingRecords.length > 0 ? (
         <div className="bg-gray-100 w-svw">
-          <p className="font-normal text-gray-600 text-sm text-center p-2">
-            <span className="inline-flex items-center rounded-full bg-indigo-100 px-1 font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">
+          <p className="font-normal text-sm px-4 py-4">
+            <span className="inline-flex items-center rounded-full bg-indigo-700 px-2 py-1 font-bold text-white ring-1 ring-inset">
               {matchingRecords.length}
             </span>
-            &nbsp;Work in progress
+            &nbsp;<span className="text-lg font-semibold">Work in Progress</span>
           </p>
           {/* Clase para resoluciones mayores de mobile */}
           <ul className="flex-wrap flex place-items-end">
@@ -144,27 +123,32 @@ export const CardMobile = () => {
               <li
                 key={record.id}
                 className="border border-gray-200 bg-white dark:border-gray-200 w-screen flex">
-              <Link to={`/record/${record.id}`} className="flex-grow">
-                <div className="px-5 pt-1 text-gray-700 flex-grow flex flex-col w-3/4">
-                  <h5 className="font-bold tracking-tight text-base">
-                    {record.client}
-                  </h5>
-
-                  <p className="text-sm">Date: {record.date} Hour: {record.hourOpen}</p>
-                  <p className="text-sm">Elapsed Time: {elapsedTime[record.id] || "Calculating..."}</p>
-                </div>
+                <Link to={`/record/${record.id}`} className="flex-grow">
+                  <div className="px-5 pt-1 text-gray-700 flex-grow flex flex-col w-3/4">
+                    <h5 className="font-bold tracking-tight text-base">
+                      {record.client}
+                    </h5>
+                    <p className="text-sm">
+                      Date: {record.date} Hour: {record.hourOpen}
+                    </p>
+                    <p className="text-sm">
+                      Elapsed Time: {elapsedTime[record.id] || "Calculating..."}
+                    </p>
+                  </div>
                 </Link>
                 <div className="flex items-stretch">
                   <button
-                    onClick={(e) => {
-                      // Evitar que se ejecute la acción inmediatamente
-                      e.preventDefault();
-                      onPunchOut(record.id)
-                    }}
+                    onClick={handleEndShiftClick}
                     type="button"
                     className="bg-indigo-700 text-white p-2 hover:bg-indigo-500 text-sm h-full">
                     End Shift
                   </button>
+                  <PopupModal
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    elapsedTime={elapsedTime[record.id]}
+                    onSubmit={(comment2) => onPunchOut(record.id, comment2)} // Pasa el comentario recibido
+                  />
                 </div>
               </li>
             ))}
@@ -172,8 +156,11 @@ export const CardMobile = () => {
         </div>
       ) : (
         <div className="flex items-center justify-center mt-10">
-          <div className="text-center">
-            <p>You don't have any open work.</p>
+          <div className="text-center font-medium text-base text-neutral-400">
+            <p className="flex">
+              <IconBoltFilled stroke={1} />
+              Let's get to work!
+            </p>
           </div>
         </div>
       )}

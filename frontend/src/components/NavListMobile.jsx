@@ -27,14 +27,18 @@ export function NavListMobile() {
             <p>Home</p>
           </Link>
         </li>
+
+        {user?.role === "worker" && (
         <li className="flex items-center rounded-full hover:bg-white text-gray-600 hover:text-blue-500 transition-colors px-6 py-2 text-sm font-semibold">
           <Link
-            to="/time"
+            to="/history"
             className="flex flex-col items-center active:text-indigo-800 active:bg-white">
             <IconHistory stroke={2} />
             <p>History</p>
           </Link>
         </li>
+        )}
+
         {/* Contenido para Admin y editores */}
         {(user?.role === "admin" || user?.role === "editor") && (
           <>

@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../partials/Navbar'
 import ClockIn from '../components/ClockIn';
-import Footer from '../partials/Footer';
 
 const Time = () => {
     const navigate = useNavigate();
@@ -19,9 +18,10 @@ const Time = () => {
             <div className='bg-white h-screen flex flex-col'>
                 <div className='flex-grow flex flex-col'>
                     <Navbar />
-                    <ClockIn />
+                    <div className='mb-20'>
+                        <ClockIn />
+                    </div>
                 </div>
-                <Footer />
             </div>
         </>
     );

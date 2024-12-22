@@ -25,7 +25,7 @@ const RecenterMap = ({ lat, lng }) => {
   }, [lat, lng, map]);
   return null;
 };
-const Maps = () => {
+export const Maps = () => {
   const [position, setPosition] = useState(null);
 
   useEffect(() => {
@@ -65,10 +65,10 @@ const Maps = () => {
       {position ? (
         <MapContainer
           center={[position.lat, position.lng]}
-          zoom={15}
+          zoom={13}
           scrollWheelZoom={true}
           zoomControl={false}
-          className="w-full h-[500px] z-0"
+          className="w-full h-[200px]"
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
@@ -88,4 +88,3 @@ const Maps = () => {
   );
 };
 
-export default Maps;

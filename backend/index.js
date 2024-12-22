@@ -71,7 +71,7 @@ app.get('/api/time', async (req, res) => {
 });
 
 app.patch('/api/timePunchOut', async (req, res) => {
-    const { id, punchOutTime, punchOutLocation, punchOutDate, open, comment2 } = req.body;
+    const { id, punchOutTime, punchOutLocation, punchOutDate, open, comment2, duration } = req.body;
 
     try {
         // Buscar el registro en MongoDB por el ID
@@ -81,38 +81,31 @@ app.patch('/api/timePunchOut', async (req, res) => {
             return res.status(404).json({ error: 'Registro no encontrado' });
         }
 
-        // Obtener los valores de hourOpen y punchOutTime y calcular la duración
+/*         // Obtener los valores de hourOpen y punchOutTime y calcular la duración
         const hourOpen = new Date(`${record.date}T${record.hourOpen}:00`);
         const punchOut = new Date(`${punchOutDate}T${punchOutTime}:00`);
 
-        // Verificar si las fechas coinciden
-        if (record.date !== punchOutDate) {
-            // Actualizar los campos para el caso de fecha diferente
-            record.punchOutTime = punchOutTime;
-            record.punchOutLocation = punchOutLocation;
-            record.open = open;
-            record.duration = "It's been more than 12 hours";
-            record.comment2 = comment2;
-
-            // Guardar el registro actualizado y terminar la respuesta
-            await record.save();
-            return res.status(200).json({ message: 'Punch-out registrado correctamente (fecha diferente)' });
-        }
-
+        // Calcular la diferencia de tiempo entre ambos puntos
         const timeDifference = punchOut - hourOpen;
 
-        // Convertir la diferencia a horas y minutos
-        const hours = Math.floor(timeDifference / (1000 * 60 * 60));
-        const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-        const duration = `${hours}h ${minutes}m`;
+        if (timeDifference < 0) {
+            return res.status(400).json({ error: 'Punch-out time cannot be before punch-in time' });
+        }
+
+        const totalMinutes = Math.floor(timeDifference / (1000 * 60));
+        const totalHours = Math.floor(totalMinutes / 60);
+        const remainingMinutes = totalMinutes % 60;
+
+        const duration = `${totalHours}h ${remainingMinutes}m`; */
 
         // Actualizar los campos en el documento encontrado
         record.punchOutTime = punchOutTime;
+        record.punchOutDate = punchOutDate;
         record.punchOutLocation = punchOutLocation;
         record.open = open;
         record.duration = duration;
         record.comment2 = comment2;
-  
+
       // Guardar el registro actualizado en MongoDB
       await record.save();
       res.status(200).json({ message: 'Punch-out registrado correctamente' });
@@ -126,7 +119,7 @@ app.patch('/api/timePunchOut', async (req, res) => {
 //Ruta para guardar los datos de horas en el JSON
 app.post('/api/saveData', async (req, res) => {
     const data = req.body.data;
-    
+
     try {
         // Crear un nuevo registro en la base de datos utilizando el modelo
         const newRecord = new TimeRecording(data);

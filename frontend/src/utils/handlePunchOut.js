@@ -6,7 +6,8 @@ export const handlePunchOut = async (
   API_URL,
   setMatchingRecords,
   matchingRecords,
-  comment2
+  comment2,
+  elapsedTime
 ) => {
   const time = new Date().toLocaleTimeString([], {
     hour: "2-digit",
@@ -14,12 +15,16 @@ export const handlePunchOut = async (
   });
   // Fecha actual en la zona horaria local
   const currentDateLocal = moment().tz("America/New_York").format("YYYY-MM-DD");
+
+  const duration = elapsedTime[recordId];
+  console.log(elapsedTime);
   const punchOutData = {
     id: recordId, // Incluye el ID del registro
     punchOutTime: time,
     punchOutLocation: location,
     punchOutDate: currentDateLocal,
     comment2: comment2,
+    duration: duration,
     open: false,
   };
 
@@ -29,7 +34,6 @@ export const handlePunchOut = async (
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(punchOutData),
     });
-
     // Actualizar el estado del componente para eliminar el registro del DOM
     setMatchingRecords(
       Array.isArray(matchingRecords)

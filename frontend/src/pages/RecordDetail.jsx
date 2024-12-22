@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { handlePunchOut } from "../utils/handlePunchOut";
+import { fetchLocation } from "../utils/fetchLocation";
 import { IconChevronLeft } from "@tabler/icons-react";
 import { calculateElapsedTime } from "../utils/elapsedTime";
 import { UserContext } from "../utils/UserContext";
@@ -35,7 +36,7 @@ const RecordDetail = () => {
   const { id } = useParams(); // Obtiene el ID desde la URL
   const [matchingRecords, setMatchingRecords] = useState([]);
   const API_URL = import.meta.env.VITE_BACK_API_URL;
-  const [position, setPosition] = useState({ lat: -34.397, lng: 150.644 });
+  const [location, setLocation] = useState({ latitude: -34.397, longitude: 150.644 });
   const [elapsedTime, setElapsedTime] = useState(""); // Almacena los tiempos transcurridos para cada record
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -49,15 +50,19 @@ const RecordDetail = () => {
 
   const onPunchOut = async (recordId, comment2) => {
     setIsModalOpen(false);
-
+    //Esto arregla el problema de ID de elapsedTime
+    const elapsedTimeId = {
+      [recordId]: elapsedTime
+    }
     try {
       await handlePunchOut(
         recordId,
-        position,
+        location,
         API_URL,
         setMatchingRecords,
         matchingRecords,
-        comment2
+        comment2,
+        elapsedTimeId
       );
       navigate("/dashboard");
     } catch (error) {
@@ -67,38 +72,44 @@ const RecordDetail = () => {
   };
 
   useEffect(() => {
+
+
     // Solicitar la ubicación del usuario
-    if (navigator.geolocation) {
+    /* if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setPosition({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
+          setLocation({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
           });
         },
         (err) => {
           console.error("Error al obtener la ubicación: ", err);
           // Puedes establecer una ubicación predeterminada aquí si lo deseas
-          setPosition({ lat: -34.397, lng: 150.644 });
+          setLocation({ latitude: -34.397, longitude: 150.644 });
         }
       );
     } else {
       console.error("La geolocalización no es soportada por este navegador.");
       // Establecer una ubicación predeterminada
-      setPosition({ lat: -34.397, lng: 150.644 });
-    }
+      setLocation({ latitude: -34.397, longitude: 150.644 });
+    } */
   }, []);
 
   useEffect(() => {
+
+    fetchLocation()
+    .then((locationData) => setLocation(locationData))
+    .catch((err) => console.log(err));
+
     const fetchRecord = async () => {
       try {
         const response = await fetch(`${API_URL}/record/${id}`);
         const data = await response.json();
         setMatchingRecords(data);
-
         // Calcular tiempos transcurridos iniciales
         if (data?.hourOpen) {
-          setElapsedTime(calculateElapsedTime(data.hourOpen));
+          setElapsedTime(calculateElapsedTime(data.hourOpen, data.date));
         }
       } catch (error) {
         console.error("Error al cargar el registro:", error);
@@ -110,9 +121,8 @@ const RecordDetail = () => {
 
   useEffect(() => {
     if (!matchingRecords || !matchingRecords.hourOpen) return;
-
     const interval = setInterval(() => {
-      setElapsedTime(calculateElapsedTime(matchingRecords.hourOpen));
+      setElapsedTime(calculateElapsedTime(matchingRecords.hourOpen, matchingRecords.date));
     }, 60000);
 
     return () => clearInterval(interval);
@@ -120,37 +130,36 @@ const RecordDetail = () => {
 
   return (
     <>
-      <div className="py-5 flex justify-between bg-gray-100">
-        <div className="pl-5">
+      <div className="py-5 flex justify-center items-center bg-gray-100 sm:hidden relative">
+        <div className="absolute left-5">
           <Link to="/dashboard">
             <IconChevronLeft stroke={2} />
           </Link>
         </div>
-        <div className="text-center m-auto">Work in Progress</div>
+        <div className="text-center">Work in Progress</div>
       </div>
-      <div className="px-5 py-2">
+      <div className="px-5 py-2 mb-16">
         <Navbar />
         <div className="flex items-center justify-center">
           <div className="w-full max-w-sm bg-indigo-800 border rounded-lg shadow border-indigo-300">
             <div className="relative">
-              {position ? (
+              {location ? (
                 <MapContainer
-                  center={[position.lat, position.lng]}
+                  center={[location.latitude, location.longitude]}
                   zoom={15}
                   scrollWheelZoom={true}
                   zoomControl={false}
-                  className="w-full h-[300px] rounded-t-lg">
+                  className="w-full h-[300px] rounded-t-lg z-0">
                   <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
-                  <Marker position={[position.lat, position.lng]}>
+                  <Marker position={[location.latitude, location.longitude]}>
                     <Popup>
-                      You are here: {position.lat.toFixed(4)},{" "}
-                      {position.lng.toFixed(4)}
+                      {matchingRecords.name}
                     </Popup>
                   </Marker>
-                  <RecenterMap lat={position.lat} lng={position.lng} />
+                  <RecenterMap lat={location.latitude} lng={location.longitude} />
                 </MapContainer>
               ) : (
                 <div className="m-4">Loading Map...</div>
@@ -187,13 +196,13 @@ const RecordDetail = () => {
                 <button
                   onClick={
                     handleEndShiftClick
-                    /* onPunchOut(matchingRecords.id); */
                   }
                   type="button"
                   className="bg-indigo-950 text-white p-4 hover:bg-indigo-500 text-base h-full w-full rounded-md">
                   End Shift
                 </button>
                 <PopupModal
+                  className="z-1"
                   isOpen={isModalOpen}
                   onClose={handleCloseModal}
                   elapsedTime={elapsedTime}

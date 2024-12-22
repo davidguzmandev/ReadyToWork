@@ -22,6 +22,7 @@ const timeRecordingSchema = new mongoose.Schema({
   },
   open: { type: Boolean, required: true }, // Indica si está abierto
   punchOutTime: { type: String, required: false }, // Hora de salida
+  punchOutDate: { type: String, required: false}, // Hora de salida
   punchOutLocation: {
     latitude: { type: Number, required: false }, // Latitud de salida
     longitude: { type: Number, required: false } // Longitud de salida
